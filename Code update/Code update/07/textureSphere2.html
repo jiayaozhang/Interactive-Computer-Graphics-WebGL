@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+#version 300 es
+
+// assume both position and normal are in homogeneous form
+
+in vec4 aPosition;
+
+uniform mat4 uModelViewMatrix;
+uniform mat4 uProjectionMatrix;
+
+out float s, t;
+
+void
+main()
+{
+
+    float pi = acos(0.0);
+
+    s= 0.5*acos(aPosition.x)/pi;
+    //s= 0.5+asin(vPosition.x)/pi;
+
+    t = 0.5*asin(aPosition.y/sqrt(1.0-aPosition.x*aPosition.x))/pi;
+    //t = 0.5+asin(vPosition.y)/pi;
+
+    gl_Position = uProjectionMatrix * uModelViewMatrix * aPosition;
+
+
+}
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+#version 300 es
+
+precision mediump float;
+
+in float s, t;
+out vec4 fColor;
+
+uniform sampler2D uTextureMap;
+
+void
+main()
+{
+
+    fColor = vec4(1.0, 0.0, 0.0, 1.0)*texture(uTextureMap, vec2(s, t));
+
+}
+</script>
+
+<p> </p>
+<button id = "Button0">Increase R</button>
+<button id = "Button1">Decrease R</button>
+
+<p> </p>
+<button id = "Button2">Increase theta</button>
+<button id = "Button3">Decrease theta</button>
+<button id = "Button4">Increase phi</button>
+<button id = "Button5">Decrease phi</button>
+<p> </p>
+<button id = "Button6">Increase Subdivisions</button>
+<button id = "Button7">Decrease Subdivisions</button>
+
+<p></p>
+
+<canvas id="gl-canvas" width="1024" height="1024"> </canvas>
+
+<script src="../Common/initShaders.js"></script>
+<script src="../Common/MVnew.js"></script>
+<script src="textureSphere2.js"></script>
+
+</body>
+</html>

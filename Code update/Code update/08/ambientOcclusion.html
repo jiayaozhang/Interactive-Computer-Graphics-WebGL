@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<body>
+
+<canvas id="gl-canvas" width="1024" height="1024"> </canvas>
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+#version 300 es
+
+in vec4 aPosition;
+in vec3 aNormal;
+
+uniform mat4 modelViewMatrix;
+uniform mat4 projectionMatrix;
+
+out vec3 vNormal;
+out vec4 vPosition;
+
+void
+main()
+{
+    vNormal = aNormal;
+    vPosition = modelViewMatrix * aPosition;
+    gl_Position = projectionMatrix * vPosition;
+}
+</script>
+
+<script id="vertex-blit" type="x-shader/x-vertex">
+#version 300 es
+
+in vec4 aPosition;
+out vec2 vTexCoord;
+
+void
+main()
+{
+    vTexCoord = 0.5 * aPosition.xy + 0.5;
+    gl_Position = aPosition;
+}
+</script>
+
+<script id="lit" type="x-shader/x-fragment">
+#version 300 es
+
+precision highp float;
+
+in vec3 vNormal;
+
+const vec3 lightDir = vec3( 0.0, 0.0, 1.0 );
+
+out vec4 color;
+
+void
+main()
+{
+    float lightDot = max( dot( lightDir, vNormal ), 0.0 );
+
+    color = vec4( lightDot, lightDot, lightDot, 1.0 );
+}
+</script>
+
+<script id="normal-map" type="x-shader/x-fragment">
+#version 300 es
+
+precision highp float;
+
+in vec3 vNormal;
+
+out vec4 color;
+
+void
+main()
+{
+    color = vec4( vNormal, 1.0 );
+}
+</script>
+
+<script id="depth-render" type="x-shader/x-fragment">
+#version 300 es
+
+precision highp float;
+precision highp int;
+
+void
+main()
+{
+    // No color output; only depth from the rasterizer
+}
+</script>
+
+<script id="color-blit" type="x-shader/x-fragment">
+#version 300 es
+
+precision highp float;
+
+in vec2 vTexCoord;
+
+uniform sampler2D blitTexture;
+
+out vec4 color;
+
+void
+main()
+{
+    color = texture( blitTexture, vTexCoord );
+    color.a = 1.0;
+}
+</script>
+
+<script id="depth-blit" type="x-shader/x-fragment">
+#version 300 es
+
+precision highp float;
+
+in vec2 vTexCoord;
+
+uniform sampler2D blitTexture;
+
+out vec4 color;
+
+void
+main()
+{
+    float depthValue = texture( blitTexture, vTexCoord ).r;
+    color = vec4( vec3( depthValue ), 1.0 );
+}
+</script>
+
+<script id="ssao" type="x-shader/x-fragment">
+#version 300 es
+
+#define NUM_OFFSETS  64
+
+precision highp float;
+
+in vec4 vPosition;
+in vec3 vNormal;
+
+uniform vec2      windowSize;
+uniform mat4      projectionMatrix;
+uniform sampler2D depthTexture;
+uniform vec3      offsets[NUM_OFFSETS];
+
+out vec4 color;
+
+void
+main()
+{
+    vec2  st = gl_FragCoord.xy / windowSize;
+    float depth = texture( depthTexture, st ).r;
+
+    vec3 N = normalize( vNormal );
+    vec3 T = normalize( vec3(-N.y, N.x, 0.0) );
+    vec3 B = normalize( cross(N, T) );
+
+    mat3 R = mat3( T, B, N );
+
+    float count = 0.0;
+
+    for ( int i = 0; i < NUM_OFFSETS; ++i ) {
+        vec3 p = R * offsets[i];
+        p += vPosition.xyz;
+        vec4 pp = projectionMatrix * vec4( p, 1.0 );
+        pp /= pp.w;
+        pp *= 0.5;
+        pp += 0.5;
+
+        float d = texture( depthTexture, pp.xy ).r;
+
+        count += d < depth ? 1.0 : 0.0;
+    }
+
+    float occlusion = 1.0 - (count / float(NUM_OFFSETS));
+
+    const vec3 lightDir = vec3( 0.0, 0.0, 1.0 );
+    float lightDot = max( dot( lightDir, vNormal ), 0.0 );
+
+    vec3 c = vec3( lightDot * occlusion );
+
+    color = vec4( c, 1.0 );
+}
+</script>
+
+<script src="../Common/initShaders.js"></script>
+<script src="../Common/MVnew.js"></script>
+<script src="Shapes/DragonModel-highRes.js"></script>
+<script src="Shapes/Dragon.js"></script>
+<script src="Shapes/Quad.js"></script>
+<script src="ambientOcclusion.js"></script>
+
+</body>
+</html>

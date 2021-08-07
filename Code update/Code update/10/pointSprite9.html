@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+<title>Point Sprite</title>
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+#version 300 es
+
+in vec4 aPosition;
+uniform float theta;
+
+void
+main()
+{
+    float s = sin( 0.01*theta );
+    float c = cos( 0.01*theta );
+
+    gl_PointSize = 100.0;
+
+    gl_Position.x = -s * aPosition.y + c * aPosition.x;
+    gl_Position.y =  s * aPosition.x + c * aPosition.y;
+    gl_Position = vec4(gl_Position.x, gl_Position.y, 0.0, 1.0);
+}
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+#version 300 es
+
+precision mediump float;
+
+out vec4 fColor;
+
+uniform sampler2D textureMap;
+uniform float angle;
+
+void
+main()
+{
+    vec2 rotatedCoord;
+
+    float s = sin(angle);
+    float c = cos(angle);
+    float cx = gl_PointCoord.x - 0.5;
+    float cy = gl_PointCoord.y - 0.5;
+    rotatedCoord.x = 0.5-s*cy + c*cx;
+    rotatedCoord.y = 0.5+s*cx + c*cy;
+    vec4 red = vec4( 1.0, 0.0, 0.0, 1.0 );
+    float x = 2.0*(rotatedCoord.x-0.5);
+    float y = 2.0*(rotatedCoord.y-0.5);
+    fColor = vec4(texture( textureMap, rotatedCoord ).xyz, 1.0-x*x-y*y);
+}
+</script>
+
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+<script type="text/javascript" src="../Common/MVnew.js"></script>
+<script type="text/javascript" src="pointSprite9.js"></script>
+</head>
+
+<body>
+<canvas id="gl-canvas" width="512" height="512">
+Oops ... your browser doesn't support the HTML5 canvas element
+</canvas>
+</body>
+</html>

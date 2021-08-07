@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+<title>Point Sprite 6</title>
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+#version 300 es
+
+in vec3 aPosition;
+in vec3 aColor;
+in vec3 aVelocity;
+
+out vec3 vColor;
+
+uniform float time;
+
+void
+main()
+{
+    // position with wrap around to keep in cube
+
+    vec3 temp = mod(aPosition+time*aVelocity+1.0,2.0)-1.0;
+
+    gl_PointSize = 30.0*(0.5+aPosition.z);
+
+    vColor = aColor;
+
+    //gl_Position = aPosition+time*vec4(aVelocity, 0.0);
+    gl_Position = vec4(temp, 1.0);
+}
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+#version 300 es
+
+precision mediump float;
+
+uniform float theta;
+
+in vec3 vColor;
+out vec4 fColor;
+
+void
+main()
+{
+
+   // compute normal from texture coordinates of sprite
+
+  vec3 normal;
+  normal.x = 2.0*(gl_PointCoord.x - 0.5);
+  normal.y = 2.0*(gl_PointCoord.y - 0.5);
+  normal.z = 1.0 - normal.x*normal.x - normal.y*normal.y;
+
+  // discard fragment if outside unit circle
+
+  if(normal.z <= 0.0)  discard;
+  normal.z = sqrt(normal.z);
+
+   // light source on unit sphere
+
+    float phi = radians(45.0);
+    vec3 light = vec3(sin(phi)*sin(0.1*theta), cos(phi), sin(phi)*cos(0.1*theta));
+    //light = normalize(light);
+
+    // diffuse lighting
+
+    fColor = vec4(max(dot(light, normal), 0.0)*vColor, 1.0);
+
+}
+</script>
+
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+<script type="text/javascript" src="../Common/MVnew.js"></script>
+<script type="text/javascript" src="pointSprite8.js"></script>
+</head>
+
+<body>
+<canvas id="gl-canvas" width="1024" height="1024">
+Oops ... your browser doesn't support the HTML5 canvas element
+</canvas>
+</body>
+</html>

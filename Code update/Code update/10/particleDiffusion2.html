@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+
+<script id="vertex-shader1" type="x-shader/x-vertex">
+#version 300 es
+
+in vec4 aPosition1;
+in vec2 aTexCoord;
+
+out vec2 vTexCoord;
+
+void main()
+{
+    gl_Position = aPosition1;
+    vTexCoord = aTexCoord;
+
+}
+</script>
+
+<script id="vertex-shader2" type="x-shader/x-vertex">
+#version 300 es
+
+in  vec4 aPosition2;
+uniform float pointSize;
+
+void main()
+{
+    gl_PointSize = pointSize;
+    gl_Position = aPosition2;
+}
+</script>
+
+<script id="fragment-shader1" type="x-shader/x-fragment">
+#version 300 es
+
+precision mediump float;
+
+uniform sampler2D textureMap;
+uniform float d;
+uniform float s;
+
+in vec2 vTexCoord;
+out vec4 fColor;
+
+void main()
+{
+    float x = vTexCoord.x;
+    float y = vTexCoord.y;
+    fColor = (texture( textureMap, vec2(x+d, y))
+                   +texture( textureMap, vec2(x, y+d))
+                   +texture( textureMap, vec2(x-d, y))
+                   +texture( textureMap, vec2(x, y-d)))/s;
+
+}
+</script>
+<script id="fragment-shader2" type="x-shader/x-fragment">
+#version 300 es
+
+precision mediump float;
+
+out vec4 fColor;
+
+uniform vec4 color;
+void
+main()
+{
+    fColor = color;
+
+}
+</script>
+
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+<script type="text/javascript" src="../Common/MVnew.js"></script>
+<script type="text/javascript" src="particleDiffusion2.js"></script>
+
+
+<body>
+<canvas id="gl-canvas" width="1024" height="1024">
+Oops ... your browser doesn't support the HTML5 canvas element
+</canvas>
+</body>
+</html>

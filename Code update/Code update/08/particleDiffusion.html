@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<canvas id="gl-canvas" width="1024" height="1024"> </canvas>
+
+<script id="vertex-shader1" type="x-shader/x-vertex">
+#version 300 es
+
+in vec2 aPosition1;
+in vec2 aTexCoord;
+
+out vec2 vTexCoord;
+
+void main()
+{
+    gl_Position = vec4(aPosition1, 0.0, 1.0);
+    vTexCoord = aTexCoord;
+
+}
+</script>
+
+<script id="vertex-shader2" type="x-shader/x-vertex">
+#version 300 es
+
+in  vec2 aPosition2;
+uniform float uPointSize;
+
+void main()
+{
+    gl_PointSize = uPointSize;
+    gl_Position = vec4(aPosition2, 0.0, 1.0);
+}
+</script>
+
+<script id="fragment-shader1" type="x-shader/x-fragment">
+#version 300 es
+
+precision mediump float;
+
+uniform sampler2D uTextureMap;
+uniform float uDistance;
+uniform float uScale;
+
+in vec2 vTexCoord;
+out vec4 fColor;
+
+void main()
+{
+    float x = vTexCoord.x;
+    float y = vTexCoord.y;
+    fColor = (texture( uTextureMap, vec2(x+uDistance, y))
+                   +texture( uTextureMap, vec2(x, y+uDistance))
+                   +texture( uTextureMap, vec2(x-uDistance, y))
+                   +texture( uTextureMap, vec2(x, y-uDistance)))/uScale;
+
+}
+</script>
+<script id="fragment-shader2" type="x-shader/x-fragment">
+#version 300 es
+
+precision mediump float;
+
+out vec4 fColor;
+
+uniform vec4 uColor;
+void
+main()
+{
+    fColor = uColor;
+
+}
+</script>
+
+<script src="../Common/initShaders.js"></script>
+<script src="../Common/MVnew.js"></script>
+<script src="particleDiffusion.js"></script>
+
+</body>
+</html>

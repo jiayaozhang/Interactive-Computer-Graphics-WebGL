@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<body>
+  
+<canvas id="gl-canvas" width="512" height="512"></canvas>
+
+<button id = "ButtonX">Rotate X</button>
+<button id = "ButtonY">Rotate Y</button>
+<button id = "ButtonZ">Rotate Z</button>
+<button id = "ButtonT">Toggle Rotation</button>
+<div>
+<button id = "ButtonC">Cube Rotation</button>
+<button id = "ButtonL">Light Rotation</button>
+
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+#version 300 es
+
+in  vec4 aPosition;
+in  vec4 aNormal;
+out vec4 vColor;
+
+uniform vec4 uAmbientProduct, uDiffuseProduct, uSpecularProduct;
+uniform mat4 uModelViewMatrix;
+uniform mat4 uProjectionMatrix;
+uniform mat4 uRotationMatrix;
+uniform vec4 uLightPosition;
+uniform float uShininess;
+
+uniform bool uLflag;
+uniform bool uCflag;
+
+vec4 oPosition;
+
+void main()
+{
+
+    // vertex position in eye oordinates with rotation of cube
+
+    if(uCflag)  oPosition = uModelViewMatrix *uRotationMatrix * aPosition;
+
+    // vertex position in eye oordinates without rotation of cube
+
+     else  oPosition = uModelViewMatrix * aPosition;
+
+
+    // vector from vertex to light on eye coordinates
+
+    vec3 L;
+
+    // light vector with rotation of light
+    if(uLflag)
+    {
+     if(uLightPosition.w == 0.0) L = normalize((uModelViewMatrix * uRotationMatrix *uLightPosition).xyz);
+       else L = normalize((uModelViewMatrix * uRotationMatrix *uLightPosition - oPosition).xyz);
+    }
+    // light vector without rotation of light
+
+    else
+    {
+      if(uLightPosition.w == 0.0) L = normalize((uModelViewMatrix * uLightPosition).xyz);
+      else L = normalize((uModelViewMatrix * uLightPosition - oPosition).xyz);
+    }
+    // vector from vertex to viewer in eye coordinates
+
+    vec3 E = normalize(-oPosition.xyz);
+    vec3 H = normalize(L + E);
+
+    // Transform vertex normal into eye coordinates
+
+    vec3 N = normalize((uModelViewMatrix*aNormal).xyz);
+
+    // Compute terms in the illumination equation
+    vec4 ambient = uAmbientProduct;
+
+    float Kd = max(dot(L, N), 0.0 );
+    vec4  diffuse = Kd*uDiffuseProduct;
+
+    float Ks = pow( max(dot(N, H), 0.0), uShininess);
+    vec4  specular = Ks * uSpecularProduct;
+
+    if( dot(L, N) < 0.0 ) {
+	      specular = vec4(0.0, 0.0, 0.0, 1.0);
+    }
+
+
+
+    if(uCflag)
+
+    //rotate cube
+
+     gl_Position = uProjectionMatrix * uModelViewMatrix * uRotationMatrix * aPosition;
+
+    // no rotation of cube
+
+     else gl_Position = uProjectionMatrix * uModelViewMatrix * aPosition;
+
+    vColor = ambient + diffuse +specular;
+    //fColor =  specular;
+
+    vColor.a = 1.0;
+}
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+#version 300 es
+
+precision mediump float;
+
+in vec4 vColor;
+out vec4 fColor;
+
+void
+main()
+{
+    fColor = vColor;
+}
+</script>
+
+<script src="../Common/initShaders.js"></script>
+<script src="../Common/MVnew.js"></script>
+<script src="shadedCube2.js"></script>
+
+</body>
+</html>

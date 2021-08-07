@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<canvas id="gl-canvas" width="512" height="512"> </canvas>
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+#version 300 es
+
+in vec2 aPosition;
+
+void
+main()
+{
+    gl_Position =  vec4(aPosition, 0.0, 1.0);
+}
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+#version 300 es
+
+precision mediump float;
+
+out vec4 fColor;
+
+void
+main()
+{
+    float sinc;
+    float x = 2.0*gl_FragCoord.x/511.0-1.0;
+    float y = 2.0*gl_FragCoord.y/511.0-1.0;
+    float r = 2.0*3.14*sqrt(x*x + y*y)/2.0;
+    if(r>0.001) sinc = sin(r)/r;
+    else sinc = 1.0;
+
+    fColor = vec4(sinc, sinc, sinc, 1.0);
+    if(fColor.g<0.5) fColor.g = 2.0*fColor.g;
+      else fColor.g = 2.0 - 2.0*fColor.g;
+    fColor.b = 1.0-fColor.b;
+
+}
+</script>
+
+<script src="../Common/initShaders.js"></script>
+<script src="../Common/MVnew.js"></script>
+<script src="hatImage2.js"></script>
+
+</body>
+</html>

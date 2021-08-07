@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+
+<body>
+
+<canvas id="gl-canvas" width="1024" height="1024"> </canvas>
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+#version 300 es
+
+in vec4 aPosition;
+
+uniform mat4 modelViewMatrix;
+uniform mat4 projectionMatrix;
+uniform vec4 boundingBox;  // [ center.xy, extents.xy ]
+
+out vec2 vTexCoord;
+
+void
+main()
+{
+    vec2 scale = 1.0 / boundingBox.zw;
+    vTexCoord = scale * ( aPosition.xy - boundingBox.xy ) + 0.5;
+    gl_Position = projectionMatrix * modelViewMatrix * aPosition;
+}
+</script>
+
+<script id="albedo-fragment" type="x-shader/x-fragment">
+#version 300 es
+
+precision highp float;
+
+in vec2 vTexCoord;
+
+uniform sampler2D specularMap;
+
+const vec3 woodMaterial = vec3( 192, 64, 0 );
+const vec3 jadeMaterial = vec3( 0, 168, 107 );
+
+out vec4 color;
+
+void
+main()
+{
+    vec4 texel = texture( specularMap, vTexCoord );
+
+    bool jade = all( greaterThan(texel.rgb, vec3(0.1)) );
+
+    color = vec4( jade ? jadeMaterial : woodMaterial, 255.0 ) / 255.0;
+}
+</script>
+
+<script id="specular-fragment" type="x-shader/x-fragment">
+#version 300 es
+
+precision highp float;
+
+in vec2 vTexCoord;
+
+uniform sampler2D specularMap;
+
+out vec4 color;
+
+void
+main()
+{
+    vec4 texel = texture( specularMap, vTexCoord );
+
+    bool shiny = all( greaterThan(texel.rgb, vec3(0.1)) );
+
+    color = vec4( vec3( shiny ? 1.0 : 0.0 ), 1.0 );
+}
+</script>
+
+<script src="../Common/initShaders.js"></script>
+<script src="../Common/MVnew.js"></script>
+<script src="Shapes/DragonModel-highRes.js"></script>
+<script src="Shapes/Dragon.js"></script>
+<script src="Textures/Stripes.js"></script>
+<script src="deferredLighting.js"></script>
+
+</body>
+</html>

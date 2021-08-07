@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<canvas id="gl-canvas" width="512" height="512"> </canvas>
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+#version 300 es
+
+in vec2 aPosition;
+in  vec2 aTexCoord;
+out vec2 vTexCoord;
+
+void
+main()
+{
+    vTexCoord = aTexCoord;
+    gl_Position =  vec4(aPosition, 0.0, 1.0);
+}
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+#version 300 es
+
+precision mediump float;
+
+in vec2 vTexCoord;
+out vec4 fColor;
+
+uniform sampler2D uTextureMap;
+
+void
+main()
+{
+    float d = 1.0/256.0;
+    float x = vTexCoord.x;
+    float y = vTexCoord.y;
+
+    fColor = 10.0*abs(
+        texture(uTextureMap, vec2(x+d, y))
+       -texture(uTextureMap, vec2(x-d, y)))
+       +10.0*abs(texture( uTextureMap, vec2(x, y+d))
+       -texture(uTextureMap, vec2(x, y-d)));
+
+    fColor.w = 1.0;
+}
+</script>
+
+<script src="../Common/initShaders.js"></script>
+<script src="honolulu4.js"></script>
+<script src="../Common/MVnew.js"></script>
+<script src="hawaiiImage.js"></script>
+
+</body>
+</html>

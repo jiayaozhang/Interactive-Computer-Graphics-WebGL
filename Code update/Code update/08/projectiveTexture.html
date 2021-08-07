@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<body>
+<canvas id="gl-canvas" width="512" height="512"> </canvas>
+<div>
+<button id = "ButtonX">Rotate X</button>
+<button id = "ButtonY">Rotate Y</button>
+<button id = "ButtonZ">Rotate Z</button>
+<button id = "ButtonT">Toggle Cube Rotation</button>
+<button id = "ButtonL">Toggle Light Rotation</button>
+</div>
+<script id="vertex-shader" type="x-shader/x-vertex">
+#version 300 es
+
+in vec4 aPosition;
+in vec3 aNormal;
+
+out vec4 vProjTexCoord;
+out vec3 vLightDirection;
+out vec3 vNormal;
+
+uniform mat4 uModelViewMatrix;
+uniform mat4 uProjectionMatrix;
+uniform mat3 uNormalMatrix;
+
+uniform mat4 uLightViewMatrix;
+uniform mat4 uLightProjectionMatrix;
+uniform vec4 uLightPosition;
+
+void main()
+{
+    vec4 eyePosition = uModelViewMatrix*aPosition;
+    vec4 objLightPosition = uLightProjectionMatrix * uLightViewMatrix*eyePosition;
+    vProjTexCoord = vec4(0.5 * objLightPosition.xyz + 0.5, objLightPosition.w);
+    vLightDirection =normalize((eyePosition- uLightPosition).xyz);
+
+    vNormal = uNormalMatrix*aNormal;
+    gl_Position = uProjectionMatrix*eyePosition;
+}
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+#version 300 es
+
+precision mediump float;
+
+in vec3 vNormal;
+in vec4 vProjTexCoord;
+in vec3 vLightDirection;
+out vec4 fColor;
+
+uniform sampler2D uTextureMap;
+
+void
+main()
+{
+    vec4 spotLightColor = textureProj(uTextureMap, vProjTexCoord);
+    vec4 baseColor = vec4( 0.0, 0.0, 0.0, 1.0);
+
+    if(-dot(vNormal, vLightDirection)>0.0) fColor = spotLightColor;
+    else fColor = baseColor;
+}
+</script>
+
+<script src="../Common/initShaders.js"></script>
+<script src="../Common/MVnew.js"></script>
+<script src="projectiveTexture.js"></script>
+
+</body>
+</html>

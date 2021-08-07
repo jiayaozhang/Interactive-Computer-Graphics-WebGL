@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<canvas id="gl-canvas" width="512" height="512"> </canvas>
+
+<button id = "ButtonX">Rotate X</button>
+<button id = "ButtonY">Rotate Y</button>
+<button id = "ButtonZ">Rotate Z</button>
+<button id = "ButtonT">Toggle Rotation</button>
+
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+#version 300 es
+
+in vec4 aPosition;
+in vec4 aNormal;
+out vec3 R;
+
+uniform mat4 uModelViewMatrix;
+uniform mat4 uProjectionMatrix;
+uniform mat3 uNormalMatrix;
+
+void main()
+{
+    gl_Position = uProjectionMatrix*uModelViewMatrix*aPosition;
+
+    vec3 eyePos  = (uModelViewMatrix*aPosition).xyz;
+
+    vec3 N = normalize(uNormalMatrix*aNormal.xyz);
+
+    R = reflect(eyePos, N);
+
+}
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+#version 300 es
+
+precision mediump float;
+
+in vec3 R;
+out vec4 fColor;
+
+uniform samplerCube uTexMap;
+
+void main()
+{
+    fColor = texture(uTexMap, R);
+}
+</script>
+
+<script src="../Common/initShaders.js"></script>
+<script src="../Common/MVnew.js"></script>
+<script src="reflectionMap1.js"></script>
+
+</body>
+</html>

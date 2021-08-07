@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+
+
+<body>
+
+
+    <script id="vs" type="x-shader/x-vertex">
+        #version 300 es
+        #define POSITION_LOCATION 0
+        #define COLOR_LOCATION 1
+
+        precision highp float;
+        precision highp int;
+
+        layout(location = POSITION_LOCATION) in vec2 aPosition;
+        layout(location = COLOR_LOCATION) in vec4 aColor;
+        flat out vec4 vColor;
+
+        void main()
+        {
+            vColor = aColor;
+            gl_Position = vec4(aPosition + vec2(float(gl_InstanceID) - 0.5, 0.0), 0.0, 1.0);
+        }
+    </script>
+
+    <script id="fs" type="x-shader/x-fragment">
+        #version 300 es
+        precision highp float;
+        precision highp int;
+
+        flat in vec4 vColor;
+        out vec4 fColor;
+
+        void main()
+        {
+            fColor = vColor;
+        }
+    </script>
+
+    <script src="../Common/initShaders.js"></script>
+    <script src="instance1.js"></script>
+
+    <canvas id="gl-canvas" width="512" height="512">
+    Oops ... your browser doesn't support the HTML5 canvas element
+    </canvas>
+
+
+</body>
+</html>

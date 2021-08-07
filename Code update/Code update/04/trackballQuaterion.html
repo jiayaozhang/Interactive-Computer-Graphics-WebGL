@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<canvas id="gl-canvas" width="512"" height="512"> </canvas>
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+#version 300 es
+
+in  vec4 aPosition;
+in  vec4 aColor;
+out vec4 vColor;
+
+uniform vec4 uRotationQuaternion;
+
+// quaternion multiplier
+vec4 multq(vec4 a, vec4 b)
+{
+   return(vec4(a.x*b.x - dot(a.yzw, b.yzw), a.x*b.yzw+b.x*a.yzw+cross(b.yzw, a.yzw)));
+}
+
+// inverse quaternion
+
+vec4 invq(vec4 a)
+{
+   return(vec4(a.x, -a.yzw)/dot(a,a));
+}
+
+void main()
+{
+  vec4 p;
+
+  p = vec4(0.0, aPosition.xyz);  // input point quaternion
+  p = multq(uRotationQuaternion, multq(p, invq(uRotationQuaternion))); // rotated point quaternion
+  gl_Position = vec4( p.yzw, 1.0); // convert back to homogeneous coordinates
+  vColor = aColor;
+}
+</script>
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+#version 300 es
+
+precision mediump float;
+
+in vec4 vColor;
+out vec4 fColor;
+
+void
+main()
+{
+    fColor = vColor;
+}
+</script>
+
+<script src="../Common/initShaders.js"></script>
+<script src="../Common/MVnew.js"></script>
+<script src="trackballQuaterion.js"></script>
+<button id = "ButtonH">Toggle Hidden Surface Removal</button>
+
+</body>
+</html>

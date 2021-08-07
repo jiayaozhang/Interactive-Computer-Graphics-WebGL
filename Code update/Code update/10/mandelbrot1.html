@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+#version 300 es
+
+in vec4 aPosition;
+in vec2 aTexCoord;
+out vec2 vTexCoord;
+
+void main()
+{
+    vTexCoord = aTexCoord.st;
+    gl_Position = aPosition;
+}
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+#version 300 es
+
+precision mediump float;
+
+in vec2 vTexCoord;
+out vec4 fColor;
+
+uniform sampler2D textureMap;
+
+void main()
+{
+    fColor = texture( textureMap, vTexCoord );
+}
+</script>
+
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+<script type="text/javascript" src="../Common/MVnew.js"></script>
+<script type="text/javascript" src="mandelbrot1.js"></script>
+
+<body>
+<canvas id="gl-canvas" width="1024"" height="1024">
+Oops ... your browser doesn't support the HTML5 canvas element
+</canvas>
+</body>
+</html>
