@@ -245,7 +245,7 @@ function mat3()
           out[0][1]=out[0][2]=out[1][0]=out[1][2]=out[2][0]=out[2][1]=0.0;
           break;
     case 1:
-         for(var i=0; i<3; i++) for(var i=0; i<3; i++) {
+         for(var i=0; i<3; i++) for(var j=0; j<3; j++) {
            out[i][j]=arguments[0][3*i+j];
          }
         break;
@@ -284,7 +284,7 @@ function mat4()
       break;
 
     case 1:
-      for(var i=0; i<4; i++) for(var i=0; i<4; i++) {
+      for(var i=0; i<4; i++) for(var j=0; j<4; j++) {
         out[i][j]=arguments[0][4*i+j];
       }
       break;
